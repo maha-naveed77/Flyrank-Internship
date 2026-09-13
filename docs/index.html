@@ -25,11 +25,11 @@
 
 <h2>Abstract</h2>
 <div class="abstract">
-Which pages should a content reviewer with limited time check first for a possible refresh? This work builds a Random Forest model on FlyRank's search performance warehouse to rank pages by decline risk, using April 2026 search-console signals to predict a subsequent impression drop in May 2026. Under an honest, client-grouped validation split — where no client's pages appear in both train and test — the model reaches 0.820 Precision@50, compared to 0.240 for a hand-written baseline rule using the same split. CTR and average search position are the strongest observed drivers of the score; session-level engagement signals contribute almost nothing, reflecting their low (~4%) availability in this dataset. The result is offered as decision-support for prioritizing manual review, not as a causal or production-ready claim.
+Which pages should a content reviewer with limited time check first for a possible refresh? This work builds a Random Forest model on FlyRank's search performance warehouse to rank pages by decline risk, using April 2026 search-console signals to predict a subsequent impression drop in May 2026. Under an honest, client-grouped validation split where no client's pages appear in both train and test the model reaches 0.820 Precision@50, compared to 0.240 for a hand-written baseline rule using the same split. CTR and average search position are the strongest observed drivers of the score; session-level engagement signals contribute almost nothing, reflecting their low (~4%) availability in this dataset. The result is offered as decision-support for prioritizing manual review, not as a causal or production-ready claim.
 </div>
 
 <h2>Introduction / Problem Statement</h2>
-<p>A content reviewer can typically check a fixed number of pages per cycle — far fewer than the number of pages that show any sign of decline. A hand-written rule (score pages by search visibility, freshness, and position) already exists in this line of work, but treats every signal with the same fixed weight regardless of how they actually interact. This work asks: <strong>given a page's search signals over a recent month, which pages should a reviewer look at first?</strong> The decision improved is refresh-review prioritization; the actor is a content strategist with limited capacity; the cost of a wrong call is two-sided — wasting a review slot on a stable page, or missing a real decline until the next cycle.</p>
+<p>A content reviewer can typically check a fixed number of pages per cycle far fewer than the number of pages that show any sign of decline. A hand-written rule (score pages by search visibility, freshness, and position) already exists in this line of work, but treats every signal with the same fixed weight regardless of how they actually interact. This work asks: <strong>given a page's search signals over a recent month, which pages should a reviewer look at first?</strong> The decision improved is refresh-review prioritization; the actor is a content strategist with limited capacity; the cost of a wrong call is two-sided wasting a review slot on a stable page, or missing a real decline until the next cycle.</p>
 
 <h2>Data</h2>
 <p>This work uses the FlyRank ML Internship warehouse release (Hugging Face: <code>FlyRank/internship-warehouse</code>), specifically the <code>fact_content_daily_performance</code> table, filtered to two mid-panel months: <strong>April 2026</strong> (feature window) and <strong>May 2026</strong> (outcome window used to define the label). The grain is one row per content page, per client, per day, aggregated to a monthly level per page. The sealed final month (June 2026, the <code>_sample</code> table) was deliberately excluded from all development, per the internship's data-use guidance, since it represents the natural outcome window of any past→future label and would otherwise leak the answer. No client names, URLs, domains, or raw exports appear anywhere in this work.</p>
@@ -39,7 +39,7 @@ Which pages should a content reviewer with limited time check first for a possib
 <p><strong>Features (all from April, strictly before the label's outcome window):</strong> <code>impressions</code>, <code>clicks</code>, <code>average search position</code>, <code>CTR</code>, <code>AI-referral sessions</code>, <code>scroll events</code>.</p>
 <p><strong>Baseline:</strong> a hand-written rule scoring pages by the gap between their actual CTR and the average CTR for pages at the same position tier, multiplied by impressions (so large, high-traffic gaps rank above small, low-traffic ones).</p>
 <p><strong>Model:</strong> Random Forest, chosen because earlier signal auditing (staleness vs. CTR) showed a non-monotonic, MIXED relationship — suggesting decline risk depends on signal <em>combinations</em>, not a single linear rule.</p>
-<p><strong>Validation:</strong> grouped split by <code>client_hash_id</code> — no client's pages appear in both train and test. A naive random row-level split was also tested for comparison and produced an inflated 0.900 Precision@50, versus 0.820 under the honest grouped split — evidence that a naive split lets the model partly memorize client-specific quirks rather than learn generalizable signal.</p>
+<p><strong>Validation:</strong> grouped split by <code>client_hash_id</code> no client's pages appear in both train and test. A naive random row-level split was also tested for comparison and produced an inflated 0.900 Precision@50, versus 0.820 under the honest grouped split evidence that a naive split lets the model partly memorize client-specific quirks rather than learn generalizable signal.</p>
 <p><strong>Leakage check:</strong> all six features come only from the April window, strictly before the May label window. No FlyRank product-decision fields (health/priority scores) were used as inputs.</p>
 
 <h2>Results</h2>
@@ -58,11 +58,11 @@ Which pages should a content reviewer with limited time check first for a possib
 <h2>Limitations &amp; Honest Framing</h2>
 <div class="limits">
 <ul>
-<li>Validated on a single month pair (April → May 2026) and one client-holdout split — not yet tested across multiple time periods.</li>
+<li>Validated on a single month pair (April → May 2026) and one client-holdout split not yet tested across multiple time periods.</li>
 <li><code>is_declining</code> is a proxy label (a >20% impression drop), not a verified causal or product outcome.</li>
 <li>GA4-derived engagement features have very low availability (~4% of rows) in this warehouse slice, limiting how much true engagement signal the model can use.</li>
-<li>Client history is unevenly distributed — some clients have far more historical data than others — so performance may vary by client maturity.</li>
-<li>All results are <strong>observed, directional, and decision-support</strong> — this work makes no claim to predict or explain Google's ranking algorithm, nor to prove that any refresh action causes recovery.</li>
+<li>Client history is unevenly distributed some clients have far more historical data than others so performance may vary by client maturity.</li>
+<li>All results are <strong>observed, directional, and decision-support</strong> this work makes no claim to predict or explain Google's ranking algorithm, nor to prove that any refresh action causes recovery.</li>
 </ul>
 </div>
 
@@ -78,7 +78,7 @@ Which pages should a content reviewer with limited time check first for a possib
 <p><a href="https://github.com/maha-naveed77/Flyrank-Internship">github.com/maha-naveed77/Flyrank-Internship</a></p>
 
 <footer>
-Built on the FlyRank ML Internship dataset — <a href="https://flyrank.ai">flyrank.ai</a>
+Built on the FlyRank ML Internship dataset <a href="https://flyrank.ai">flyrank.ai</a>
 </footer>
 
 </body>
